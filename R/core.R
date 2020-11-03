@@ -190,10 +190,11 @@ endRight <- function(x) {
   ifelse(first.plus, end(last(x)), end(first(x)))
 }
 mapTxToGenome <- function(exons) {
-  strand <- as.character(strand(exons)[1])
   stopifnot(all(exons$exon_rank == seq_along(exons)))
-  bases <- S4Vectors:::fancy_mseq(width(exons), start(exons)-1L,
-                                  rev=(strand == "-"))
+  is_on_plus_strand <- as.logical(strand(exons) == "+")
+  from <- ifelse(is_on_plus_strand, start(exons), end(exons))
+  by <- ifelse(is_on_plus_strand, 1L, -1L)
+  bases <- sequence(width(exons), from=from, by=by)
   data.frame(tx=seq_along(bases),
              genome=bases,
              exon_rank=rep(exons$exon_rank, width(exons)))
